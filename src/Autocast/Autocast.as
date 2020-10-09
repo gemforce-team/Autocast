@@ -39,6 +39,11 @@ package Autocast
 		
 		private static var spellRangeCircles:Array;
 		
+		private static var Tower:Class;
+		private static var Lantern:Class;
+		private static var Amplifier:Class;
+		private static var Trap:Class;
+		
 		public function Autocast() 
 		{
 			super();
@@ -63,6 +68,10 @@ package Autocast
 			this.markerSpellType = -1;
 			this.frameCounter = 0;
 			spellRangeCircles = new Array(this.cnt.mcRangeFreeze, this.cnt.mcRangeWhiteout, this.cnt.mcRangeIceShards);
+			Tower = getDefinitionByName("com.giab.games.gcfw.entity.Tower") as Class;
+			Lantern = getDefinitionByName("com.giab.games.gcfw.entity.Lantern") as Class;
+			Amplifier = getDefinitionByName("com.giab.games.gcfw.entity.Amplifier") as Class;
+			Trap = getDefinitionByName("com.giab.games.gcfw.entity.Trap") as Class;
 			
 			logger.log("bind", "Autocast initialized!");
 			
@@ -135,7 +144,7 @@ package Autocast
 			var pE:KeyboardEvent = e.eventArgs.event;
 			if (pE.ctrlKey)
 			{
-				if (pE.keyCode >= 49 && pE.keyCode <= 51)
+				if (pE.keyCode >= 49 && pE.keyCode <= 54)
 				{
 					e.eventArgs.continueDefault = false;
 					if (this.core.arrIsSpellBtnVisible[pE.keyCode - 49])
@@ -156,9 +165,21 @@ package Autocast
 			var mE:MouseEvent = e.eventArgs.event as MouseEvent;
 			if(this.core.ingameStatus == gameObjects.constants.ingameStatus.PLAYING && this.markerSpellType != -1)
             {
-				this.casters[this.markerSpellType] = new SpellCaster(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8, this.markerSpellType);
+				if (this.markerSpellType <= 2)
+				{
+					this.casters[this.markerSpellType] = new SpellCaster(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8, this.markerSpellType);
+					GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Added a new marker!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
+				}
+				else
+				{
+					var building:Object = SpellCaster.getBuildingForPos(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8);
+					if (building != null && (building is Tower || building is Lantern || building is Amplifier || building is Trap))
+					{
+						this.casters[this.markerSpellType] = new SpellCaster(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8, this.markerSpellType);
+						GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Spell bound to building!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
+					}
+				}
 				this.markerSpellType = -1;
-				GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Added a new marker!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
 			}
 		}
 		
@@ -168,7 +189,14 @@ package Autocast
 			if(this.core.ingameStatus == gameObjects.constants.ingameStatus.PLAYING && this.markerSpellType != -1)
             {
 				this.casters[this.markerSpellType] = null;
-				GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Removed a marker!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
+				if (this.markerSpellType <= 2)
+				{
+					GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Removed a marker!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
+				}
+				else
+				{
+					GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Unbound spell from building!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
+				}
 			}
 			this.markerSpellType = -1;
 		}
@@ -184,7 +212,7 @@ package Autocast
 		{
 			for each (var caster:SpellCaster in this.casters) 
 			{
-				if (caster != null && SpellCaster.getSpellCharge(caster.spellType) >= SpellCaster.getMaxSpellCharge(caster.spellType))
+				if (caster != null && caster.valid() && caster.castReady())
 				{
 					caster.cast();
 					SpellCaster.consumeSpellCharge(caster.spellType);
