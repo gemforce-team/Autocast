@@ -32,6 +32,7 @@ package Autocast
 			if (spellType >= 0 && spellType <= 2)
 			{
 				new StrikeSpell(this.positionX, this.positionY, this.spellType);
+				consumeSpellCharge(this.spellType);
 			}
 			else if (spellType >= 3 && spellType <= 5)
 			{

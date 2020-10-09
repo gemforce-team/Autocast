@@ -215,7 +215,6 @@ package Autocast
 				if (caster != null && caster.valid() && caster.castReady())
 				{
 					caster.cast();
-					SpellCaster.consumeSpellCharge(caster.spellType);
 				}
 			}
 		}
