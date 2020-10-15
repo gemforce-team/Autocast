@@ -15,8 +15,8 @@ package Autocast
 	
 	public class Autocast extends MovieClip
 	{
-		public const VERSION:String = "1.1";
-		public const GAME_VERSION:String = "1.1.0a";
+		public const VERSION:String = "1.2";
+		public const GAME_VERSION:String = "1.1.2b";
 		public const BEZEL_VERSION:String = "0.2.1";
 		public const MOD_NAME:String = "Autocast";
 		
