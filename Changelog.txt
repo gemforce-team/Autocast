@@ -1,0 +1,2 @@
+15.10.2020 v1.2 for 1.1.2b
+	Thanks to piepie62's contribution there is now support for enchancement spells and visuals for both strike spell ranges and enchancement spell markers.
