@@ -3,7 +3,7 @@
 ## Description
 Autocast is a game modification for GCFW.
 
-It allows you to set a virtual marker on the field (one per strike spell). Every time the respective strike spell's charge reaches maximum it will be automatically cast on that marker's position.
+It allows you to set a virtual marker on the field (one per strike spell and enchancement spell). Every time the respective spell's charge reaches maximum it will be automatically cast on that marker's position.
 
 
 This is a time saving and QOL mod, exactly the same results can be achieved without it.
@@ -14,15 +14,14 @@ https://github.com/gemforce-team/Autocast/blob/master/Changelog.txt
 
 
 ## Known issues
-* No graphics for spell position\range.
 * **Markers are NOT RESET when you enter a new level!**
 
 
 ## Usage
-* Press `Ctrl + 1/2/3` to enter marker placement mode for that strike spell. The only indication that you've done so is a floating text message.
+* Press `Ctrl + 1/2/3/4/5/6` to enter marker placement mode for that strike spell. The only indication that you've done so is a floating text message.
 * Leftclick the desired point on the playing field, an invisible marker will be placed there. Again, you'll receive confirmation vie a floating text message.
-* From that point on the respective strike spell will be cast on that position every time it reaches max charge. (Cast attempts happen every 15 frames)
-* To remove a marker, enter marker placement mode with `Ctrl + 1/2/3`, then rightclick.
+* From that point on the respective spell will be cast on that position every time it reaches max charge. (Cast attempts happen every 15 frames)
+* To remove a marker, enter marker placement mode with `Ctrl + 1/2/3/4/5/6`, then rightclick.
 * **Please not that at the moment markers are not reset when you enter a new level, you'll have to (re)move them individually**
 
 
@@ -50,7 +49,7 @@ Release history: [Releases](https://github.com/gemforce-team/Autocast/releases)
 ## Hotkeys
 By default Autocast's hotkeys are:
 ```
-Ctrl + strike spell button - enter marker placement mode
+Ctrl + spell button - enter marker placement mode
 While in marker placement mode:
 Rightclick removes the marker for the selected spell
 Leftclick places\moves the marker to selected position
@@ -71,4 +70,4 @@ GemCraft - Frostborn Wrath is developed and owned by [gameinabottle](http://game
 
 
 # Credits
-Autocast is developed by Hellrage
+Autocast is developed by Hellrage and contributors
