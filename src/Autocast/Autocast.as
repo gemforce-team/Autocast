@@ -6,6 +6,7 @@ package Autocast
 	 */
 	
 	import flash.display.Bitmap;
+	import flash.display.PixelSnapping;
 	import flash.display.MovieClip;
 	import flash.filesystem.*;
 	import flash.events.*;
@@ -37,7 +38,16 @@ package Autocast
 		public var markerSpellType:int;
 		private var frameCounter:int;
 		
-		private static var spellRangeCircles:Array;
+		private static var spellRangeCircleSizes:Array;
+		
+		private static var iconBitmaps:Array;
+		
+		private var spellImages:Array;
+		
+		private static var Tower:Class;
+		private static var Lantern:Class;
+		private static var Amplifier:Class;
+		private static var Trap:Class;
 		
 		public function Autocast() 
 		{
@@ -62,7 +72,53 @@ package Autocast
 			this.casters = new Object();
 			this.markerSpellType = -1;
 			this.frameCounter = 0;
-			spellRangeCircles = new Array(this.cnt.mcRangeFreeze, this.cnt.mcRangeWhiteout, this.cnt.mcRangeIceShards);
+			this.spellImages = new Array();
+			this.spellImages[0] = new (getDefinitionByName(getQualifiedClassName(this.cnt.mcRangeFreeze)) as Class)();
+			this.spellImages[0].x = 50;
+			this.spellImages[0].y = 8;
+			this.spellImages[0].mcMask.width = 1680;
+			this.spellImages[0].mcMask.height = 1064;
+			this.spellImages[0].circle.visible = true;
+			this.spellImages[0].visible = false;
+			this.spellImages[1] = new (getDefinitionByName(getQualifiedClassName(this.cnt.mcRangeWhiteout)) as Class)();
+			this.spellImages[1].x = 50;
+			this.spellImages[1].y = 8;
+			this.spellImages[1].mcMask.width = 1680;
+			this.spellImages[1].mcMask.height = 1064;
+			this.spellImages[1].circle.visible = true;
+			this.spellImages[1].visible = false;
+			this.spellImages[2] = new (getDefinitionByName(getQualifiedClassName(this.cnt.mcRangeIceShards)) as Class)();
+			this.spellImages[2].x = 50;
+			this.spellImages[2].y = 8;
+			this.spellImages[2].mcMask.width = 1680;
+			this.spellImages[2].mcMask.height = 1064;
+			this.spellImages[2].circle.visible = true;
+			this.spellImages[2].visible = false;
+			spellRangeCircleSizes = new Array(this.core.spFreezeRadius, this.core.spWhiteoutRadius, this.core.spIsRadius);
+			
+			iconBitmaps = new Array();
+			iconBitmaps[0] = new Bitmap(GV.gemBitmapCreator.bmpdEnhIconBolt, PixelSnapping.ALWAYS, true);
+			iconBitmaps[0].visible = true;
+			iconBitmaps[1] = new Bitmap(GV.gemBitmapCreator.bmpdEnhIconBeam, PixelSnapping.ALWAYS, true);
+			iconBitmaps[1].visible = true;
+			iconBitmaps[2] = new Bitmap(GV.gemBitmapCreator.bmpdEnhIconBarrage, PixelSnapping.ALWAYS, true);
+			iconBitmaps[2].visible = true;
+			
+			this.spellImages[3] = new MovieClip();
+			this.spellImages[3].addChild(iconBitmaps[0]);
+			this.spellImages[3].visible = false;
+			this.spellImages[4] = new MovieClip();
+			this.spellImages[4].addChild(iconBitmaps[1]);
+			this.spellImages[4].visible = false;
+			this.spellImages[5] = new MovieClip();
+			this.spellImages[5].addChild(iconBitmaps[2]);
+			this.spellImages[5].visible = false;
+			
+			
+			Tower = getDefinitionByName("com.giab.games.gcfw.entity.Tower") as Class;
+			Lantern = getDefinitionByName("com.giab.games.gcfw.entity.Lantern") as Class;
+			Amplifier = getDefinitionByName("com.giab.games.gcfw.entity.Amplifier") as Class;
+			Trap = getDefinitionByName("com.giab.games.gcfw.entity.Trap") as Class;
 			
 			logger.log("bind", "Autocast initialized!");
 			
@@ -135,7 +191,7 @@ package Autocast
 			var pE:KeyboardEvent = e.eventArgs.event;
 			if (pE.ctrlKey)
 			{
-				if (pE.keyCode >= 49 && pE.keyCode <= 51)
+				if (pE.keyCode >= 49 && pE.keyCode <= 54)
 				{
 					e.eventArgs.continueDefault = false;
 					if (this.core.arrIsSpellBtnVisible[pE.keyCode - 49])
@@ -156,9 +212,30 @@ package Autocast
 			var mE:MouseEvent = e.eventArgs.event as MouseEvent;
 			if(this.core.ingameStatus == gameObjects.constants.ingameStatus.PLAYING && this.markerSpellType != -1)
             {
-				this.casters[this.markerSpellType] = new SpellCaster(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8, this.markerSpellType);
+				if (this.markerSpellType <= 2)
+				{
+					this.casters[this.markerSpellType] = new SpellCaster(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8, this.markerSpellType);
+					GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Added a new marker!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
+					
+				    this.spellImages[markerSpellType].circle.width = this.spellImages[markerSpellType].circle.height = spellRangeCircleSizes[markerSpellType].g() * 2 * 28;
+					this.spellImages[markerSpellType].circle.x = this.GV.main.mouseX - 50;
+					this.spellImages[markerSpellType].circle.y = this.GV.main.mouseY - 8;
+					this.spellImages[markerSpellType].circle.visible = true;
+				}
+				else
+				{
+					var building:Object = SpellCaster.getBuildingForPos(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8);
+					if (building != null && (building is Tower || building is Lantern || building is Amplifier || building is Trap))
+					{
+						this.casters[this.markerSpellType] = new SpellCaster(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8, this.markerSpellType);
+						GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Spell bound to building!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
+						
+						this.spellImages[markerSpellType].x = this.GV.main.mouseX - iconBitmaps[markerSpellType - 3].width / 2;
+						this.spellImages[markerSpellType].y = this.GV.main.mouseY - iconBitmaps[markerSpellType - 3].height / 2;
+						this.spellImages[markerSpellType].visible = true;
+					}
+				}
 				this.markerSpellType = -1;
-				GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Added a new marker!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
 			}
 		}
 		
@@ -168,27 +245,58 @@ package Autocast
 			if(this.core.ingameStatus == gameObjects.constants.ingameStatus.PLAYING && this.markerSpellType != -1)
             {
 				this.casters[this.markerSpellType] = null;
-				GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Removed a marker!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
+				if (this.markerSpellType <= 2)
+				{
+					GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Removed a marker!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
+					this.spellImages[markerSpellType].circle.visible = false;
+				}
+				else
+				{
+					GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Unbound spell from building!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
+					this.spellImages[markerSpellType].visible = false;
+				}
 			}
 			this.markerSpellType = -1;
 		}
 		
 		public function eh_ingamePreRenderInfoPanel(e:Object): void
-		{
+		{	
 			this.frameCounter++;
 			if (this.frameCounter >= 15)
 				this.castAtAllMarkers();
+				
+			readdImages();
+			
+				
+			for (var i:int = 0; i < 6; i++)
+			{
+				if (this.casters[i] != null && this.casters[i].valid())
+				{
+					this.spellImages[i].visible = true;
+				}
+				else
+				{
+					this.spellImages[i].visible = false;
+				}
+			}
 		}
 		
 		private function castAtAllMarkers(): void
 		{
 			for each (var caster:SpellCaster in this.casters) 
 			{
-				if (caster != null && SpellCaster.getSpellCharge(caster.spellType) >= SpellCaster.getMaxSpellCharge(caster.spellType))
+				if (caster != null && caster.valid() && caster.castReady())
 				{
 					caster.cast();
-					SpellCaster.consumeSpellCharge(caster.spellType);
 				}
+			}
+		}
+		
+		private function readdImages(): void
+		{
+			for (var i:int = 0; i < 6; i++)
+			{
+				this.core.cnt.cntRetinaHud.addChild(this.spellImages[i]);
 			}
 		}
 	}
