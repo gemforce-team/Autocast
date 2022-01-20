@@ -14,7 +14,7 @@ https://github.com/gemforce-team/Autocast/blob/master/Changelog.txt
 
 
 ## Known issues
-* **Markers are NOT RESET when you enter a new level!**
+* None at the moment!
 
 
 ## Usage
