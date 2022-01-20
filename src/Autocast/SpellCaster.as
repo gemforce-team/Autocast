@@ -5,6 +5,8 @@ package Autocast
 	 * @author Hellrage
 	 */
 	
+	import com.giab.games.gcfw.GV;
+	import com.giab.games.gcfw.entity.StrikeSpell;
 	import flash.utils.*;
 	public class SpellCaster 
 	{
@@ -12,7 +14,6 @@ package Autocast
 		public var positionY:int;
 		public var building:Object;
 		public var spellType:int;
-		public static var StrikeSpell:Class;
 		
 		public function SpellCaster(posX:int, posY:int, spellType:int) 
 		{
@@ -20,11 +21,6 @@ package Autocast
 			this.positionY = posY;
 			this.spellType = spellType;
 			this.building = getBuildingForPos(posX, posY);
-			
-			if (StrikeSpell == null)
-			{
-				StrikeSpell = getDefinitionByName("com.giab.games.gcfw.entity.StrikeSpell") as Class;
-			}
 		}
 		
 		public function cast(): void
@@ -36,7 +32,7 @@ package Autocast
 			}
 			else if (spellType >= 3 && spellType <= 5)
 			{
-				Autocast.Autocast.bezel.gameObjects.GV.ingameCore.spellCaster.castGemEnhancement(building.insertedGem, spellType - 3);
+				GV.ingameCore.spellCaster.castGemEnhancement(building.insertedGem, spellType - 3);
 			}
 		}
 		
@@ -67,21 +63,20 @@ package Autocast
 		
 		public static function getSpellCharge(spellType:int): Number
 		{
-			var core:Object = Autocast.Autocast.bezel.gameObjects.GV.ingameCore;
 			switch (spellType) 
 			{
 				case 0:
-					return core.spFreezeCurrentCharge.g()
+					return GV.ingameCore.spFreezeCurrentCharge.g()
 				case 1:
-					return core.spWhiteoutCurrentCharge.g()
+					return GV.ingameCore.spWhiteoutCurrentCharge.g()
 				case 2:
-					return core.spIsCurrentCharge.g()
+					return GV.ingameCore.spIsCurrentCharge.g()
 				case 3:
-					return core.spBoltCurrentCharge.g()
+					return GV.ingameCore.spBoltCurrentCharge.g()
 				case 4:
-					return core.spBeamCurrentCharge.g()
+					return GV.ingameCore.spBeamCurrentCharge.g()
 				case 5:
-					return core.spBarrageCurrentCharge.g()
+					return GV.ingameCore.spBarrageCurrentCharge.g()
 				default:
 					return -1;
 			}
@@ -89,21 +84,20 @@ package Autocast
 		
 		public static function getMaxSpellCharge(spellType:int): Number
 		{
-			var core:Object = Autocast.Autocast.bezel.gameObjects.GV.ingameCore;
 			switch (spellType) 
 			{
 				case 0:
-					return core.spFreezeMaxCharge.g()
+					return GV.ingameCore.spFreezeMaxCharge.g()
 				case 1:
-					return core.spWhiteoutMaxCharge.g()
+					return GV.ingameCore.spWhiteoutMaxCharge.g()
 				case 2:
-					return core.spIsMaxCharge.g()
+					return GV.ingameCore.spIsMaxCharge.g()
 				case 3:
-					return core.spBoltMaxCharge.g()
+					return GV.ingameCore.spBoltMaxCharge.g()
 				case 4:
-					return core.spBeamMaxCharge.g()
+					return GV.ingameCore.spBeamMaxCharge.g()
 				case 5:
-					return core.spBarrageMaxCharge.g()
+					return GV.ingameCore.spBarrageMaxCharge.g()
 				default:
 					return -1;
 			}
@@ -111,26 +105,25 @@ package Autocast
 		
 		public static function consumeSpellCharge(spellType:int): void
 		{
-			var core:Object = Autocast.Autocast.bezel.gameObjects.GV.ingameCore;
 			switch (spellType) 
 			{
 				case 0:
-					core.spFreezeCurrentCharge.s(core.spFreezeCurrentCharge.g() - 1)
+					GV.ingameCore.spFreezeCurrentCharge.s(GV.ingameCore.spFreezeCurrentCharge.g() - 1)
 					break;
 				case 1:
-					core.spWhiteoutCurrentCharge.s(core.spWhiteoutCurrentCharge.g() - 1)
+					GV.ingameCore.spWhiteoutCurrentCharge.s(GV.ingameCore.spWhiteoutCurrentCharge.g() - 1)
 					break;
 				case 2:
-					core.spIsCurrentCharge.s(core.spIsCurrentCharge.g() - 1)
+					GV.ingameCore.spIsCurrentCharge.s(GV.ingameCore.spIsCurrentCharge.g() - 1)
 					break;
 				case 3:
-					core.spBoltCurrentCharge.s(core.spBoltCurrentCharge.g() - 1)
+					GV.ingameCore.spBoltCurrentCharge.s(GV.ingameCore.spBoltCurrentCharge.g() - 1)
 					break;
 				case 4:
-					core.spBeamCurrentCharge.s(core.spBeamCurrentCharge.g() - 1)
+					GV.ingameCore.spBeamCurrentCharge.s(GV.ingameCore.spBeamCurrentCharge.g() - 1)
 					break;
 				case 5:
-					core.spBarrageCurrentCharge.s(core.spBarrageCurrentCharge.g() - 1)
+					GV.ingameCore.spBarrageCurrentCharge.s(GV.ingameCore.spBarrageCurrentCharge.g() - 1)
 					break;
 				default:
 					break;
@@ -143,7 +136,7 @@ package Autocast
 			{
 				var fieldX:int = Math.floor(posX / 28);
 				var fieldY:int = Math.floor(posY / 28);
-				return Autocast.Autocast.bezel.gameObjects.GV.ingameCore.buildingAreaMatrix[fieldY][fieldX];
+				return GV.ingameCore.buildingAreaMatrix[fieldY][fieldX];
 			}
 			return null;
 		}

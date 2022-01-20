@@ -1,10 +1,19 @@
-package Autocast 
+package Autocast
 {
 	/**
 	 * ...
 	 * @author Hellrage
 	 */
 	
+	import com.giab.games.gcfw.GV;
+	import com.giab.games.gcfw.constants.IngameStatus;
+	import com.giab.games.gcfw.entity.Amplifier;
+	import com.giab.games.gcfw.entity.Lantern;
+	import com.giab.games.gcfw.entity.Tower;
+	import com.giab.games.gcfw.entity.Trap;
+	import com.giab.games.gcfw.mcDyn.McRangeFreeze;
+	import com.giab.games.gcfw.mcDyn.McRangeIceShards;
+	import com.giab.games.gcfw.mcDyn.McRangeWhiteout;
 	import flash.display.Bitmap;
 	import flash.display.PixelSnapping;
 	import flash.display.MovieClip;
@@ -13,25 +22,8 @@ package Autocast
 	import flash.globalization.LocaleID;
 	import flash.utils.*;
 	
-	public class Autocast extends MovieClip
+	public class GCFWAutocast extends MovieClip
 	{
-		public const VERSION:String = "1.2";
-		public const GAME_VERSION:String = "1.1.2b";
-		public const BEZEL_VERSION:String = "0.2.1";
-		public const MOD_NAME:String = "Autocast";
-		
-		internal var gameObjects:Object;
-		
-		// Game object shortcuts
-		internal var core:Object;/*IngameCore*/
-		internal var cnt:Object;/*CntIngame*/
-		internal var GV:Object;/*GV*/
-		internal var SB:Object;/*SB*/
-		internal var prefs:Object;/*Prefs*/
-		
-		// Mod loader object
-		public static var bezel:Object;
-		internal static var logger:Object;
 		internal static var storage:File;
 		
 		private var casters:Object;
@@ -44,26 +36,9 @@ package Autocast
 		
 		private var spellImages:Array;
 		
-		private static var Tower:Class;
-		private static var Lantern:Class;
-		private static var Amplifier:Class;
-		private static var Trap:Class;
-		
-		public function Autocast() 
+		public function GCFWAutocast()
 		{
 			super();
-		}
-		
-		public function bind(modLoader:Object, gameObjects:Object): Autocast
-		{
-			bezel = modLoader;
-			logger = bezel.getLogger("Autocast");
-			this.gameObjects = gameObjects;
-			this.core = gameObjects.GV.ingameCore;
-			this.cnt = gameObjects.GV.main.cntScreens.cntIngame;
-			this.SB = gameObjects.SB;
-			this.GV = gameObjects.GV;
-			this.prefs = gameObjects.prefs;
 			storage = File.applicationStorageDirectory.resolvePath("Autocast");
 			
 			prepareFolders();
@@ -73,28 +48,28 @@ package Autocast
 			this.markerSpellType = -1;
 			this.frameCounter = 0;
 			this.spellImages = new Array();
-			this.spellImages[0] = new (getDefinitionByName(getQualifiedClassName(this.cnt.mcRangeFreeze)) as Class)();
+			this.spellImages[0] = new McRangeFreeze();
 			this.spellImages[0].x = 50;
 			this.spellImages[0].y = 8;
 			this.spellImages[0].mcMask.width = 1680;
 			this.spellImages[0].mcMask.height = 1064;
 			this.spellImages[0].circle.visible = true;
 			this.spellImages[0].visible = false;
-			this.spellImages[1] = new (getDefinitionByName(getQualifiedClassName(this.cnt.mcRangeWhiteout)) as Class)();
+			this.spellImages[1] = new McRangeWhiteout();
 			this.spellImages[1].x = 50;
 			this.spellImages[1].y = 8;
 			this.spellImages[1].mcMask.width = 1680;
 			this.spellImages[1].mcMask.height = 1064;
 			this.spellImages[1].circle.visible = true;
 			this.spellImages[1].visible = false;
-			this.spellImages[2] = new (getDefinitionByName(getQualifiedClassName(this.cnt.mcRangeIceShards)) as Class)();
+			this.spellImages[2] = new McRangeIceShards();
 			this.spellImages[2].x = 50;
 			this.spellImages[2].y = 8;
 			this.spellImages[2].mcMask.width = 1680;
 			this.spellImages[2].mcMask.height = 1064;
 			this.spellImages[2].circle.visible = true;
 			this.spellImages[2].visible = false;
-			spellRangeCircleSizes = new Array(this.core.spFreezeRadius, this.core.spWhiteoutRadius, this.core.spIsRadius);
+			spellRangeCircleSizes = new Array(GV.ingameCore.spFreezeRadius, GV.ingameCore.spWhiteoutRadius, GV.ingameCore.spIsRadius);
 			
 			iconBitmaps = new Array();
 			iconBitmaps[0] = new Bitmap(GV.gemBitmapCreator.bmpdEnhIconBolt, PixelSnapping.ALWAYS, true);
@@ -114,47 +89,8 @@ package Autocast
 			this.spellImages[5].addChild(iconBitmaps[2]);
 			this.spellImages[5].visible = false;
 			
-			
-			Tower = getDefinitionByName("com.giab.games.gcfw.entity.Tower") as Class;
-			Lantern = getDefinitionByName("com.giab.games.gcfw.entity.Lantern") as Class;
-			Amplifier = getDefinitionByName("com.giab.games.gcfw.entity.Amplifier") as Class;
-			Trap = getDefinitionByName("com.giab.games.gcfw.entity.Trap") as Class;
-			
-			logger.log("bind", "Autocast initialized!");
-			
-			return this;
+			AutocastMod.logger.log("bind", "Autocast initialized!");
 		}
-		
-		public function prettyVersion(): String
-		{
-			return 'v' + VERSION + ' for ' + GAME_VERSION;
-		}
-		
-		/*private function checkForUpdates(): void
-		{
-			if(!this.configuration["Check for updates"])
-				return;
-			
-			logger.log("CheckForUpdates", "Mod version: " + prettyVersion());
-			logger.log("CheckForUpdates", "Checking for updates...");
-			var repoAddress:String = "https://api.github.com/repos/gemforce-team/gemsmith/releases/latest";
-			var request:URLRequest = new URLRequest(repoAddress);
-			
-			var loader:URLLoader = new URLLoader();
-			var localThis:Gemsmith = this;
-			
-			loader.addEventListener(Event.COMPLETE, function(e:Event): void {
-				var latestTag:Object = JSON.parse(loader.data).tag_name;
-				var latestVersion:String = latestTag.replace(/[v]/gim, ' ').split('-')[0];
-				localThis.updateAvailable = (latestVersion != VERSION);
-				logger.log("CheckForUpdates", localThis.updateAvailable ? "Update available! " + latestTag : "Using the latest version: " + latestTag);
-			});
-			loader.addEventListener(IOErrorEvent.IO_ERROR, function(e:IOErrorEvent): void {
-				logger.log("CheckForUpdates", "Caught an error when checking for updates!");
-			});
-			
-			loader.load(request);
-		}*/
 		
 		private function prepareFolders(): void
 		{
@@ -166,10 +102,11 @@ package Autocast
 		
 		private function addEventListeners(): void
 		{
-			bezel.addEventListener("ingameClickOnScene", eh_ingameClickOnScene);
-			bezel.addEventListener("ingameKeyDown", eh_interceptKeyboardEvent);
-			gameObjects.GV.main.addEventListener("enterFrame", eh_ingamePreRenderInfoPanel);
-			bezel.addEventListener("ingameRightClickOnScene", eh_ingameRightClickOnScene);
+			AutocastMod.bezel.addEventListener("ingameClickOnScene", eh_ingameClickOnScene);
+			AutocastMod.bezel.addEventListener("ingameKeyDown", eh_interceptKeyboardEvent);
+			GV.main.addEventListener("enterFrame", eh_ingamePreRenderInfoPanel);
+			AutocastMod.bezel.addEventListener("ingameRightClickOnScene", eh_ingameRightClickOnScene);
+			AutocastMod.bezel.addEventListener("ingameNewScene", eh_ingameNewScene);
 		}
 		
 		public function unload(): void
@@ -179,11 +116,24 @@ package Autocast
 		
 		private function removeEventListeners(): void
 		{
-			bezel.removeEventListener("ingameClickOnScene", eh_ingameClickOnScene);
-			bezel.removeEventListener("ingameKeyDown", eh_interceptKeyboardEvent);
-			bezel.removeEventListener("ingamePreRenderInfoPanel", eh_ingamePreRenderInfoPanel);
-			gameObjects.GV.main.removeEventListener("enterFrame", eh_ingamePreRenderInfoPanel);
-			bezel.removeEventListener("ingameRightClickOnScene", eh_ingameRightClickOnScene);
+			AutocastMod.bezel.removeEventListener("ingameClickOnScene", eh_ingameClickOnScene);
+			AutocastMod.bezel.removeEventListener("ingameKeyDown", eh_interceptKeyboardEvent);
+			GV.main.removeEventListener("enterFrame", eh_ingamePreRenderInfoPanel);
+			AutocastMod.bezel.removeEventListener("ingameRightClickOnScene", eh_ingameRightClickOnScene);
+			AutocastMod.bezel.removeEventListener("ingameNewScene", eh_ingameNewScene);
+		}
+		
+		public function eh_ingameNewScene(e:Object): void
+		{
+			// Remove all casters and hide circles
+			for (var i:int = 0; i < 6; i++) 
+			{
+				this.casters[i] = null;
+				if (i <= 2)
+					this.spellImages[i].circle.visible = false;
+				else
+					this.spellImages[i].visible = false;
+			}
 		}
 		
 		public function eh_interceptKeyboardEvent(e:Object): void
@@ -194,7 +144,7 @@ package Autocast
 				if (pE.keyCode >= 49 && pE.keyCode <= 54)
 				{
 					e.eventArgs.continueDefault = false;
-					if (this.core.arrIsSpellBtnVisible[pE.keyCode - 49])
+					if (GV.ingameCore.arrIsSpellBtnVisible[pE.keyCode - 49])
 					{
 						this.markerSpellType = pE.keyCode - 49; //keyCode 49 is digit 1, which is freeze spell, which is spellType 0
 						GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Entered marker placement mode!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
@@ -210,28 +160,28 @@ package Autocast
 		public function eh_ingameClickOnScene(e:Object): void
 		{
 			var mE:MouseEvent = e.eventArgs.event as MouseEvent;
-			if(this.core.ingameStatus == gameObjects.constants.ingameStatus.PLAYING && this.markerSpellType != -1)
+			if(GV.ingameCore.ingameStatus == IngameStatus.PLAYING && this.markerSpellType != -1)
             {
 				if (this.markerSpellType <= 2)
 				{
-					this.casters[this.markerSpellType] = new SpellCaster(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8, this.markerSpellType);
+					this.casters[this.markerSpellType] = new SpellCaster(GV.main.mouseX - 50, GV.main.mouseY - 8, this.markerSpellType);
 					GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Added a new marker!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
 					
 				    this.spellImages[markerSpellType].circle.width = this.spellImages[markerSpellType].circle.height = spellRangeCircleSizes[markerSpellType].g() * 2 * 28;
-					this.spellImages[markerSpellType].circle.x = this.GV.main.mouseX - 50;
-					this.spellImages[markerSpellType].circle.y = this.GV.main.mouseY - 8;
+					this.spellImages[markerSpellType].circle.x = GV.main.mouseX - 50;
+					this.spellImages[markerSpellType].circle.y = GV.main.mouseY - 8;
 					this.spellImages[markerSpellType].circle.visible = true;
 				}
 				else
 				{
-					var building:Object = SpellCaster.getBuildingForPos(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8);
+					var building:Object = SpellCaster.getBuildingForPos(GV.main.mouseX - 50, GV.main.mouseY - 8);
 					if (building != null && (building is Tower || building is Lantern || building is Amplifier || building is Trap))
 					{
-						this.casters[this.markerSpellType] = new SpellCaster(this.GV.main.mouseX - 50, this.GV.main.mouseY - 8, this.markerSpellType);
+						this.casters[this.markerSpellType] = new SpellCaster(GV.main.mouseX - 50, GV.main.mouseY - 8, this.markerSpellType);
 						GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Spell bound to building!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
 						
-						this.spellImages[markerSpellType].x = this.GV.main.mouseX - iconBitmaps[markerSpellType - 3].width / 2;
-						this.spellImages[markerSpellType].y = this.GV.main.mouseY - iconBitmaps[markerSpellType - 3].height / 2;
+						this.spellImages[markerSpellType].x = GV.main.mouseX - iconBitmaps[markerSpellType - 3].width / 2;
+						this.spellImages[markerSpellType].y = GV.main.mouseY - iconBitmaps[markerSpellType - 3].height / 2;
 						this.spellImages[markerSpellType].visible = true;
 					}
 				}
@@ -242,7 +192,7 @@ package Autocast
 		public function eh_ingameRightClickOnScene(e:Object): void
 		{
 			var mE:MouseEvent = e.eventArgs.event as MouseEvent;
-			if(this.core.ingameStatus == gameObjects.constants.ingameStatus.PLAYING && this.markerSpellType != -1)
+			if(GV.ingameCore.ingameStatus == IngameStatus.PLAYING && this.markerSpellType != -1)
             {
 				this.casters[this.markerSpellType] = null;
 				if (this.markerSpellType <= 2)
@@ -260,13 +210,17 @@ package Autocast
 		}
 		
 		public function eh_ingamePreRenderInfoPanel(e:Object): void
-		{	
+		{
+			if (GV.ingameCore.ingameStatus != IngameStatus.PLAYING)
+				return;
 			this.frameCounter++;
 			if (this.frameCounter >= 15)
+			{
 				this.castAtAllMarkers();
+				this.frameCounter = 0;
+			}
 				
 			readdImages();
-			
 				
 			for (var i:int = 0; i < 6; i++)
 			{
@@ -296,7 +250,7 @@ package Autocast
 		{
 			for (var i:int = 0; i < 6; i++)
 			{
-				this.core.cnt.cntRetinaHud.addChild(this.spellImages[i]);
+				GV.ingameCore.cnt.cntRetinaHud.addChild(this.spellImages[i]);
 			}
 		}
 	}
