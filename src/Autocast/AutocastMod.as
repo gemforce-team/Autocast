@@ -12,11 +12,11 @@ package Autocast
 	public class AutocastMod extends MovieClip implements BezelMod
 	{
 		
-		public function get VERSION():String { return "1.3"; }
-		public function get BEZEL_VERSION():String { return "1.0.0"; }
+		public function get VERSION():String { return "1.4"; }
+		public function get BEZEL_VERSION():String { return "1.0.1"; }
 		public function get MOD_NAME():String { return "Autocast"; }
 		
-		private var manaMason:Object;
+		private var autoCast:Object;
 		
 		internal static var bezel:Bezel;
 		internal static var logger:Logger;
@@ -37,16 +37,16 @@ package Autocast
 			logger = bezel.getLogger("Autocast");
 			if (bezel.mainLoader is GCFWBezel)
 			{
-				manaMason = new GCFWAutocast();
+				autoCast = new GCFWAutocast();
 			}
 		}
 		
 		public function unload():void
 		{
-			if (manaMason != null)
+			if (autoCast != null)
 			{
-				manaMason.unload();
-				manaMason = null;
+				autoCast.unload();
+				autoCast = null;
 			}
 		}
 		

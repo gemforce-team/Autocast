@@ -18,10 +18,10 @@ https://github.com/gemforce-team/Autocast/blob/master/Changelog.txt
 
 
 ## Usage
-* Press `Ctrl + 1/2/3/4/5/6` to enter marker placement mode for that strike spell. The only indication that you've done so is a floating text message.
+* Press `Ctrl + Cast Spell Button` to enter marker placement mode for that strike spell. The only indication that you've done so is a floating text message.
 * Leftclick the desired point on the playing field, an invisible marker will be placed there. Again, you'll receive confirmation vie a floating text message.
 * From that point on the respective spell will be cast on that position every time it reaches max charge. (Cast attempts happen every 15 frames)
-* To remove a marker, enter marker placement mode with `Ctrl + 1/2/3/4/5/6`, then rightclick.
+* To remove a marker, enter marker placement mode with `Ctrl + Cast Spell Button`, then rightclick.
 * **Please not that at the moment markers are not reset when you enter a new level, you'll have to (re)move them individually**
 
 

@@ -5,6 +5,8 @@ package Autocast
 	 * @author Hellrage
 	 */
 	
+	import Bezel.Events.EventTypes;
+	import Bezel.Utils.Keybind;
 	import com.giab.games.gcfw.GV;
 	import com.giab.games.gcfw.constants.IngameStatus;
 	import com.giab.games.gcfw.entity.Amplifier;
@@ -21,6 +23,7 @@ package Autocast
 	import flash.events.*;
 	import flash.globalization.LocaleID;
 	import flash.utils.*;
+	import flash.ui.Keyboard;
 	
 	public class GCFWAutocast extends MovieClip
 	{
@@ -35,6 +38,15 @@ package Autocast
 		private static var iconBitmaps:Array;
 		
 		private var spellImages:Array;
+		
+		private const spellKeybindNamesToIds:Object = {
+			"Cast freeze strike spell":0,
+			"Cast whiteout strike spell":1,
+			"Cast ice shards strike spell":2,
+			"Cast bolt enhancement spell":3,
+			"Cast beam enhancement spell":4,
+			"Cast barrage enhancement spell":5
+		};
 		
 		public function GCFWAutocast()
 		{
@@ -103,7 +115,7 @@ package Autocast
 		private function addEventListeners(): void
 		{
 			AutocastMod.bezel.addEventListener("ingameClickOnScene", eh_ingameClickOnScene);
-			AutocastMod.bezel.addEventListener("ingameKeyDown", eh_interceptKeyboardEvent);
+			AutocastMod.bezel.addEventListener(EventTypes.INGAME_KEY_DOWN, eh_interceptKeyboardEvent);
 			GV.main.addEventListener("enterFrame", eh_ingamePreRenderInfoPanel);
 			AutocastMod.bezel.addEventListener("ingameRightClickOnScene", eh_ingameRightClickOnScene);
 			AutocastMod.bezel.addEventListener("ingameNewScene", eh_ingameNewScene);
@@ -117,7 +129,7 @@ package Autocast
 		private function removeEventListeners(): void
 		{
 			AutocastMod.bezel.removeEventListener("ingameClickOnScene", eh_ingameClickOnScene);
-			AutocastMod.bezel.removeEventListener("ingameKeyDown", eh_interceptKeyboardEvent);
+			AutocastMod.bezel.removeEventListener(EventTypes.INGAME_KEY_DOWN, eh_interceptKeyboardEvent);
 			GV.main.removeEventListener("enterFrame", eh_ingamePreRenderInfoPanel);
 			AutocastMod.bezel.removeEventListener("ingameRightClickOnScene", eh_ingameRightClickOnScene);
 			AutocastMod.bezel.removeEventListener("ingameNewScene", eh_ingameNewScene);
@@ -139,21 +151,30 @@ package Autocast
 		public function eh_interceptKeyboardEvent(e:Object): void
 		{
 			var pE:KeyboardEvent = e.eventArgs.event;
-			if (pE.ctrlKey)
+			if (pE.ctrlKey && pE.keyCode != Keyboard.CONTROL)
 			{
-				if (pE.keyCode >= 49 && pE.keyCode <= 54)
+				pE.ctrlKey = false;
+				for (var keybindName:String in spellKeybindNamesToIds)
 				{
-					e.eventArgs.continueDefault = false;
-					if (GV.ingameCore.arrIsSpellBtnVisible[pE.keyCode - 49])
+					var hkval: Keybind = AutocastMod.bezel.keybindManager.getHotkeyValue(keybindName);
+					if(hkval.matches(pE))
 					{
-						this.markerSpellType = pE.keyCode - 49; //keyCode 49 is digit 1, which is freeze spell, which is spellType 0
-						GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Entered marker placement mode!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
-					}
-					else
-					{
+						e.eventArgs.continueDefault = false;
+						tryEnterMarkerMode(spellKeybindNamesToIds[keybindName]);
+						pE.ctrlKey = true;
 						return;
 					}
 				}
+				pE.ctrlKey = true;
+			}
+		}
+		
+		private function tryEnterMarkerMode(spell: int): void
+		{
+			if (GV.ingameCore.arrIsSpellBtnVisible[spell])
+			{
+				this.markerSpellType = spell; //keyCode 49 is digit 1, which is freeze spell, which is spellType 0
+				GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Entered marker placement mode!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
 			}
 		}
 		

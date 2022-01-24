@@ -1,6 +1,10 @@
 15.10.2020 v1.2 for 1.1.2b
 	Thanks to piepie62's contribution there is now support for enchancement spells and visuals for both strike spell ranges and enchancement spell markers.
+
 20.01.2022 v1.3
 	Now resets the markers when entering \ restarting a stage.
 	Also doesn't bind to enterFrame because we don't need to be running out-of-stage
 	Updated to Bezel 1.x
+	
+24.01.2022 v1.4
+	Updated to use Bezel's keybinds.
