@@ -128,7 +128,7 @@ package Autocast
 		{
 			AutocastMod.bezel.addEventListener(EventTypes.INGAME_CLICK_ON_SCENE, eh_ingameClickOnScene);
 			AutocastMod.bezel.addEventListener(EventTypes.INGAME_KEY_DOWN, eh_interceptKeyboardEvent);
-			GV.main.addEventListener("enterFrame", eh_ingamePreRenderInfoPanel);
+			GV.main.addEventListener("enterFrame", eh_onFrame);
 			AutocastMod.bezel.addEventListener(EventTypes.INGAME_RIGHT_CLICK_ON_SCENE, eh_ingameRightClickOnScene);
 			AutocastMod.bezel.addEventListener(EventTypes.INGAME_NEW_SCENE, eh_ingameNewScene);
 		}
@@ -142,7 +142,7 @@ package Autocast
 		{
 			AutocastMod.bezel.removeEventListener(EventTypes.INGAME_CLICK_ON_SCENE, eh_ingameClickOnScene);
 			AutocastMod.bezel.removeEventListener(EventTypes.INGAME_KEY_DOWN, eh_interceptKeyboardEvent);
-			GV.main.removeEventListener("enterFrame", eh_ingamePreRenderInfoPanel);
+			GV.main.removeEventListener("enterFrame", eh_onFrame);
 			AutocastMod.bezel.removeEventListener(EventTypes.INGAME_RIGHT_CLICK_ON_SCENE, eh_ingameRightClickOnScene);
 			AutocastMod.bezel.removeEventListener(EventTypes.INGAME_NEW_SCENE, eh_ingameNewScene);
 		}
@@ -247,10 +247,11 @@ package Autocast
 			this.markerSpellType = -1;
 		}
 		
-		public function eh_ingamePreRenderInfoPanel(e:IngamePreRenderInfoPanelEvent): void
+		public function eh_onFrame(e:Event): void
 		{
 			if (GV.ingameCore.ingameStatus != IngameStatus.PLAYING)
 				return;
+				
 			this.frameCounter++;
 			if (this.frameCounter >= 15)
 			{
