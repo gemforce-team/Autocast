@@ -59,6 +59,8 @@
     <element path="%BezelLibs%\GemCraft.Frostborn.Wrath.swc" />
     <element path="%BezelLibs%\gc-cs-steam.swc" />
     <element path="%BezelLibs%\BezelModLoader.swc" />
+    <element path="%BezelLibs%\ANEBytecodeEditor.swc" />
+    <element path="%BezelLibs%\FRESteamWorks.swc" />
   </externalLibraryPaths>
   <!-- Runtime Shared Libraries -->
   <rslPaths>
