@@ -5,16 +5,18 @@ package Autocast
 	 * @author Hellrage
 	 */
 	
-	import com.giab.games.gcfw.GV;
-	import com.giab.games.gcfw.entity.StrikeSpell;
-	public class SpellCaster 
+	import com.giab.games.gccs.steam.GV;
+	import com.giab.games.gccs.steam.entity.StrikeSpell;
+	import flash.utils.*;
+	
+	public class GCCSSpellCaster 
 	{
 		public var positionX:int;
 		public var positionY:int;
 		public var building:Object;
 		public var spellType:int;
 		
-		public function SpellCaster(posX:int, posY:int, spellType:int) 
+		public function GCCSSpellCaster(posX:int, posY:int, spellType:int) 
 		{
 			this.positionX = posX;
 			this.positionY = posY;
@@ -26,7 +28,7 @@ package Autocast
 		{
 			if (spellType >= 0 && spellType <= 2)
 			{
-				new StrikeSpell(this.positionX, this.positionY, this.spellType);
+				new StrikeSpell(Math.floor(this.positionX / 17), Math.floor(this.positionY / 17), this.spellType);
 				consumeSpellCharge(this.spellType);
 			}
 			else if (spellType >= 3 && spellType <= 5)
@@ -67,9 +69,9 @@ package Autocast
 				case 0:
 					return GV.ingameCore.spFreezeCurrentCharge.g()
 				case 1:
-					return GV.ingameCore.spWhiteoutCurrentCharge.g()
+					return GV.ingameCore.spCurseCurrentCharge.g()
 				case 2:
-					return GV.ingameCore.spIsCurrentCharge.g()
+					return GV.ingameCore.spWoeCurrentCharge.g()
 				case 3:
 					return GV.ingameCore.spBoltCurrentCharge.g()
 				case 4:
@@ -88,9 +90,9 @@ package Autocast
 				case 0:
 					return GV.ingameCore.spFreezeMaxCharge.g()
 				case 1:
-					return GV.ingameCore.spWhiteoutMaxCharge.g()
+					return GV.ingameCore.spCurseMaxCharge.g()
 				case 2:
-					return GV.ingameCore.spIsMaxCharge.g()
+					return GV.ingameCore.spWoeMaxCharge.g()
 				case 3:
 					return GV.ingameCore.spBoltMaxCharge.g()
 				case 4:
@@ -110,10 +112,10 @@ package Autocast
 					GV.ingameCore.spFreezeCurrentCharge.s(GV.ingameCore.spFreezeCurrentCharge.g() - 1)
 					break;
 				case 1:
-					GV.ingameCore.spWhiteoutCurrentCharge.s(GV.ingameCore.spWhiteoutCurrentCharge.g() - 1)
+					GV.ingameCore.spCurseCurrentCharge.s(GV.ingameCore.spCurseCurrentCharge.g() - 1)
 					break;
 				case 2:
-					GV.ingameCore.spIsCurrentCharge.s(GV.ingameCore.spIsCurrentCharge.g() - 1)
+					GV.ingameCore.spWoeCurrentCharge.s(GV.ingameCore.spWoeCurrentCharge.g() - 1)
 					break;
 				case 3:
 					GV.ingameCore.spBoltCurrentCharge.s(GV.ingameCore.spBoltCurrentCharge.g() - 1)
@@ -131,10 +133,10 @@ package Autocast
 		
 		public static function getBuildingForPos(posX:int, posY:int): Object
 		{
-			if(posX > 0 && posX < 60 * 28 && posY > 0 && posY < 38 * 28)
+			if((posX > 0) && (posX < 54 * 17) && (posY > 0) && (posY < 32 * 17))
 			{
-				var fieldX:int = Math.floor(posX / 28);
-				var fieldY:int = Math.floor(posY / 28);
+				var fieldX:int = Math.floor(posX / 17);
+				var fieldY:int = Math.floor(posY / 17);
 				return GV.ingameCore.buildingAreaMatrix[fieldY][fieldX];
 			}
 			return null;

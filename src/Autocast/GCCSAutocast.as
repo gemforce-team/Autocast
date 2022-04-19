@@ -5,37 +5,45 @@ package Autocast
 	 * @author Hellrage
 	 */
 	
-	import Bezel.GCCS.Events.Persistence.IngameClickOnSceneEventArgs;
-	import Bezel.GCFW.Events.EventTypes;
-	import Bezel.GCFW.Events.IngameClickOnSceneEvent;
-	import Bezel.GCFW.Events.IngameKeyDownEvent;
-	import Bezel.GCFW.Events.IngameNewSceneEvent;
-	import Bezel.GCFW.Events.IngamePreRenderInfoPanelEvent;
-	import Bezel.GCFW.Events.IngameRightClickOnSceneEvent;
+	import Bezel.GCCS.Events.EventTypes;
+	import Bezel.GCCS.Events.EventTypes;
+	import Bezel.GCCS.Events.IngameClickOnSceneEvent;
+	import Bezel.GCCS.Events.IngameKeyDownEvent;
+	import Bezel.GCCS.Events.IngameNewSceneEvent;
+	import Bezel.GCCS.Events.IngamePreRenderInfoPanelEvent;
+	import Bezel.GCCS.Events.IngameRightClickOnSceneEvent;
 	import Bezel.Utils.Keybind;
-	import com.giab.games.gcfw.GV;
-	import com.giab.games.gcfw.constants.IngameStatus;
-	import com.giab.games.gcfw.entity.Amplifier;
-	import com.giab.games.gcfw.entity.Lantern;
-	import com.giab.games.gcfw.entity.Tower;
-	import com.giab.games.gcfw.entity.Trap;
-	import com.giab.games.gcfw.mcDyn.McRangeFreeze;
-	import com.giab.games.gcfw.mcDyn.McRangeIceShards;
-	import com.giab.games.gcfw.mcDyn.McRangeWhiteout;
+	import air.desktop.URLFilePromise;
+	import com.giab.games.gccs.steam.GV;
+	import com.giab.games.gccs.steam.constants.IngameStatus;
+	import com.giab.games.gccs.steam.entity.Amplifier;
+	import com.giab.games.gccs.steam.entity.Tower;
+	import com.giab.games.gccs.steam.entity.Trap;
+	import com.giab.games.gccs.steam.mcDyn.McRangeCurse;
+	import com.giab.games.gccs.steam.mcDyn.McRangeFreeze;
+	import com.giab.games.gccs.steam.mcDyn.McRangeWoe;
 	import flash.display.Bitmap;
 	import flash.display.PixelSnapping;
 	import flash.display.MovieClip;
 	import flash.filesystem.*;
 	import flash.events.*;
+	import flash.globalization.LocaleID;
+	import flash.utils.*;
 	import flash.ui.Keyboard;
 	
-	public class GCFWAutocast extends MovieClip
+	public class GCCSAutocast extends MovieClip
 	{
 		internal static var storage:File;
 		
 		private var casters:Object;
 		public var markerSpellType:int;
 		private var frameCounter:int;
+		
+		public static const FIELD_WIDTH: Number = 54;
+		public static const FIELD_HEIGHT: Number = 32;
+		public static const WAVESTONE_WIDTH: Number = 39;
+		public static const TOP_UI_HEIGHT: Number = 53;
+		public static const TILE_SIZE: Number = 17;
 		
 		private static var spellRangeCircleSizes:Array;
 		
@@ -45,14 +53,14 @@ package Autocast
 		
 		private const spellKeybindNamesToIds:Object = {
 			"Cast freeze strike spell":0,
-			"Cast whiteout strike spell":1,
-			"Cast ice shards strike spell":2,
+			"Cast curse strike spell":1,
+			"Cast wake of eternity strike spell":2,
 			"Cast bolt enhancement spell":3,
 			"Cast beam enhancement spell":4,
 			"Cast barrage enhancement spell":5
 		};
 		
-		public function GCFWAutocast()
+		public function GCCSAutocast()
 		{
 			super();
 			storage = File.applicationStorageDirectory.resolvePath("Autocast");
@@ -65,27 +73,27 @@ package Autocast
 			this.frameCounter = 0;
 			this.spellImages = new Array();
 			this.spellImages[0] = new McRangeFreeze();
-			this.spellImages[0].x = 50;
-			this.spellImages[0].y = 8;
-			this.spellImages[0].mcMask.width = 1680;
-			this.spellImages[0].mcMask.height = 1064;
+			this.spellImages[0].x = 0;
+			this.spellImages[0].y = 0;
+			this.spellImages[0].mcMask.width = TILE_SIZE*FIELD_WIDTH;
+			this.spellImages[0].mcMask.height = TILE_SIZE*FIELD_HEIGHT;
 			this.spellImages[0].circle.visible = true;
 			this.spellImages[0].visible = false;
-			this.spellImages[1] = new McRangeWhiteout();
-			this.spellImages[1].x = 50;
-			this.spellImages[1].y = 8;
-			this.spellImages[1].mcMask.width = 1680;
-			this.spellImages[1].mcMask.height = 1064;
+			this.spellImages[1] = new McRangeCurse();
+			this.spellImages[1].x = 0;
+			this.spellImages[1].y = 0;
+			this.spellImages[1].mcMask.width = TILE_SIZE*FIELD_WIDTH;
+			this.spellImages[1].mcMask.height = TILE_SIZE*FIELD_HEIGHT;
 			this.spellImages[1].circle.visible = true;
 			this.spellImages[1].visible = false;
-			this.spellImages[2] = new McRangeIceShards();
-			this.spellImages[2].x = 50;
-			this.spellImages[2].y = 8;
-			this.spellImages[2].mcMask.width = 1680;
-			this.spellImages[2].mcMask.height = 1064;
+			this.spellImages[2] = new McRangeWoe();
+			this.spellImages[2].x = 0;
+			this.spellImages[2].y = 0;
+			this.spellImages[2].mcMask.width = TILE_SIZE*FIELD_WIDTH;
+			this.spellImages[2].mcMask.height = TILE_SIZE*FIELD_HEIGHT;
 			this.spellImages[2].circle.visible = true;
 			this.spellImages[2].visible = false;
-			spellRangeCircleSizes = new Array(GV.ingameCore.spFreezeRadius, GV.ingameCore.spWhiteoutRadius, GV.ingameCore.spIsRadius);
+			spellRangeCircleSizes = new Array(GV.ingameCore.spFreezeRadius, GV.ingameCore.spCurseRadius, GV.ingameCore.spWoeRadius);
 			
 			iconBitmaps = new Array();
 			iconBitmaps[0] = new Bitmap(GV.gemBitmapCreator.bmpdEnhIconBolt, PixelSnapping.ALWAYS, true);
@@ -175,11 +183,14 @@ package Autocast
 		
 		private function tryEnterMarkerMode(spell: int): void
 		{
-			if (GV.ingameCore.arrIsSpellBtnVisible[spell])
-			{
-				this.markerSpellType = spell; //keyCode 49 is digit 1, which is freeze spell, which is spellType 0
-				GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Entered marker placement mode!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
-			}
+			if (spell == 0 && GV.main.cntScreens.cntIngame.mcIngameFrame.btnCastFreeze.visible == false)
+				return;
+			if (spell == 1 && GV.main.cntScreens.cntIngame.mcIngameFrame.btnCastCurse.visible == false)
+				return;
+			if (spell == 2 && GV.main.cntScreens.cntIngame.mcIngameFrame.btnCastWoE.visible == false)
+				return;
+			this.markerSpellType = spell; //keyCode 49 is digit 1, which is freeze spell, which is spellType 0
+			GV.vfxEngine.createFloatingText(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Entered marker placement mode!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
 		}
 		
 		public function eh_ingameClickOnScene(e:IngameClickOnSceneEvent): void
@@ -187,23 +198,25 @@ package Autocast
 			var mE:MouseEvent = e.eventArgs.event as MouseEvent;
 			if(GV.ingameCore.ingameStatus == IngameStatus.PLAYING && this.markerSpellType != -1)
             {
+				var clickX: Number = GV.main.mouseX - WAVESTONE_WIDTH;
+				var clickY:Number = GV.main.mouseY - TOP_UI_HEIGHT;
 				if (this.markerSpellType <= 2)
 				{
-					this.casters[this.markerSpellType] = new SpellCaster(GV.main.mouseX - 50, GV.main.mouseY - 8, this.markerSpellType);
-					GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Added a new marker!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
+					this.casters[this.markerSpellType] = new GCCSSpellCaster(clickX, clickY, this.markerSpellType);
+					GV.vfxEngine.createFloatingText(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Added a new marker!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
 					
-				    this.spellImages[markerSpellType].circle.width = this.spellImages[markerSpellType].circle.height = spellRangeCircleSizes[markerSpellType].g() * 2 * 28;
-					this.spellImages[markerSpellType].circle.x = GV.main.mouseX - 50;
-					this.spellImages[markerSpellType].circle.y = GV.main.mouseY - 8;
+				    this.spellImages[markerSpellType].circle.width = this.spellImages[markerSpellType].circle.height = spellRangeCircleSizes[markerSpellType].g() * 2 * TILE_SIZE;
+					this.spellImages[markerSpellType].circle.x = GV.main.mouseX;
+					this.spellImages[markerSpellType].circle.y = GV.main.mouseY;
 					this.spellImages[markerSpellType].circle.visible = true;
 				}
 				else
 				{
-					var building:Object = SpellCaster.getBuildingForPos(GV.main.mouseX - 50, GV.main.mouseY - 8);
-					if (building != null && (building is Tower || building is Lantern || building is Amplifier || building is Trap))
+					var building:Object = GCCSSpellCaster.getBuildingForPos(clickX, clickY);
+					if (building != null && (building is Tower || building is Amplifier || building is Trap))
 					{
-						this.casters[this.markerSpellType] = new SpellCaster(GV.main.mouseX - 50, GV.main.mouseY - 8, this.markerSpellType);
-						GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Spell bound to building!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
+						this.casters[this.markerSpellType] = new GCCSSpellCaster(clickX, clickY, this.markerSpellType);
+						GV.vfxEngine.createFloatingText(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Spell bound to building!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
 						
 						this.spellImages[markerSpellType].x = GV.main.mouseX - iconBitmaps[markerSpellType - 3].width / 2;
 						this.spellImages[markerSpellType].y = GV.main.mouseY - iconBitmaps[markerSpellType - 3].height / 2;
@@ -222,12 +235,12 @@ package Autocast
 				this.casters[this.markerSpellType] = null;
 				if (this.markerSpellType <= 2)
 				{
-					GV.vfxEngine.createFloatingText4(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Removed a marker!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
+					GV.vfxEngine.createFloatingText(GV.main.mouseX, GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20), "Removed a marker!", 16768392, 12, "center", Math.random() * 3 - 1.5, -4 - Math.random() * 3, 0, 0.55, 12, 0, 1000);
 					this.spellImages[markerSpellType].circle.visible = false;
 				}
 				else
 				{
-					GV.vfxEngine.createFloatingText4(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Unbound spell from building!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
+					GV.vfxEngine.createFloatingText(GV.main.mouseX,GV.main.mouseY < 60?Number(GV.main.mouseY + 30):Number(GV.main.mouseY - 20),"Unbound spell from building!",16768392,12,"center",Math.random() * 3 - 1.5,-4 - Math.random() * 3,0,0.55,12,0,1000);
 					this.spellImages[markerSpellType].visible = false;
 				}
 			}
@@ -262,7 +275,7 @@ package Autocast
 		
 		private function castAtAllMarkers(): void
 		{
-			for each (var caster:SpellCaster in this.casters) 
+			for each (var caster:GCCSSpellCaster in this.casters) 
 			{
 				if (caster != null && caster.valid() && caster.castReady())
 				{

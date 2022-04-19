@@ -2,7 +2,6 @@ package Autocast
 {
 	import Bezel.Bezel;
 	import Bezel.BezelMod;
-	import Bezel.GCFW.GCFWBezel;
 	import Bezel.Logger;
 	import flash.display.MovieClip;
 	/**
@@ -12,8 +11,8 @@ package Autocast
 	public class AutocastMod extends MovieClip implements BezelMod
 	{
 		
-		public function get VERSION():String { return "1.4"; }
-		public function get BEZEL_VERSION():String { return "1.0.1"; }
+		public function get VERSION():String { return "1.5"; }
+		public function get BEZEL_VERSION():String { return "2.0.1"; }
 		public function get MOD_NAME():String { return "Autocast"; }
 		
 		private var autoCast:Object;
@@ -23,6 +22,7 @@ package Autocast
 		internal static var instance:AutocastMod;
 
 		public static const GCFW_VERSION:String = "1.2.1a";
+		public static const GCCS_VERSION:String = "1.0.6";
 		
 		public function AutocastMod() 
 		{
@@ -35,9 +35,13 @@ package Autocast
 		{
 			bezel = modLoader;
 			logger = bezel.getLogger("Autocast");
-			if (bezel.mainLoader is GCFWBezel)
+			if (bezel.mainLoader.gameClassFullyQualifiedName == "com.giab.games.gcfw.Main")
 			{
 				autoCast = new GCFWAutocast();
+			}
+			else if (bezel.mainLoader.gameClassFullyQualifiedName == "com.giab.games.gccs.steam.Main")
+			{
+				autoCast = new GCCSAutocast();
 			}
 		}
 		

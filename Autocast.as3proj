@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="obj\Autocast-1.4-GCFW.swf" />
+    <movie path="obj\Autocast-1.5-UNIVERSAL.swf" />
     <movie fps="30" />
     <movie width="1920" />
     <movie height="1080" />
@@ -56,7 +56,8 @@
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
-    <element path="%BezelLibs%\GemCraft Frostborn Wrath.swc" />
+    <element path="%BezelLibs%\GemCraft.Frostborn.Wrath.swc" />
+    <element path="%BezelLibs%\gc-cs-steam.swc" />
     <element path="%BezelLibs%\BezelModLoader.swc" />
   </externalLibraryPaths>
   <!-- Runtime Shared Libraries -->
