@@ -7,26 +7,99 @@ package Autocast
 	
 	import com.giab.games.gcfw.GV;
 	import com.giab.games.gcfw.entity.StrikeSpell;
-	public class SpellCaster 
+	import flash.display.Sprite;
+	import flash.display.DisplayObject;
+	import com.giab.games.gcfw.mcDyn.McRangeFreeze;
+	import com.giab.games.gcfw.mcDyn.McRangeWhiteout;
+	import com.giab.games.gcfw.mcDyn.McRangeIceShards;
+	import flash.display.PixelSnapping;
+	import flash.display.Bitmap;
+
+	public class SpellCaster extends Sprite
 	{
-		public var positionX:int;
-		public var positionY:int;
 		public var building:Object;
 		public var spellType:int;
+
+		private var image:DisplayObject;
 		
 		public function SpellCaster(posX:int, posY:int, spellType:int) 
 		{
-			this.positionX = posX;
-			this.positionY = posY;
 			this.spellType = spellType;
-			this.building = getBuildingForPos(posX, posY);
+			switch (spellType)
+			{
+				case 0:
+					var mcFreeze:McRangeFreeze = new McRangeFreeze();
+					this.x = posX;
+					this.y = posY;
+					mcFreeze.circle.width = mcFreeze.circle.height = GV.ingameCore.spFreezeRadius.g() * 2 * 28;
+					// mcFreeze.circle.mask = mcFreeze.mcMask;
+					// mcFreeze.mcMask.width = 1680;
+					// mcFreeze.mcMask.height = 1064;
+					// mcFreeze.mcMask.x = -posX;
+					// mcFreeze.mcMask.y = -posY;
+					// mcFreeze.mcMask.visible = false;
+					// this.addChild(mcFreeze.circle.mask);
+					image = mcFreeze.circle;
+					break;
+				case 1:
+					var mcWhiteout:McRangeWhiteout = new McRangeWhiteout();
+					this.x = posX;
+					this.y = posY;
+					mcWhiteout.circle.width = mcWhiteout.circle.height = GV.ingameCore.spWhiteoutRadius.g() * 2 * 28;
+					// mcWhiteout.circle.mask = mcWhiteout.mcMask;
+					// mcWhiteout.mcMask.width = 1680;
+					// mcWhiteout.mcMask.height = 1064;
+					// mcWhiteout.mcMask.x = -posX;
+					// mcWhiteout.mcMask.y = -posY;
+					// mcWhiteout.mcMask.visible = false;
+					// this.addChild(mcWhiteout.circle.mask);
+					image = mcWhiteout.circle;
+					break;
+				case 2:
+					var mcIceShards:McRangeIceShards = new McRangeIceShards();
+					this.x = posX;
+					this.y = posY;
+					mcIceShards.circle.width = mcIceShards.circle.height = GV.ingameCore.spIsRadius.g() * 2 * 28;
+					// mcIceShards.circle.mask = mcIceShards.mcMask;
+					// mcIceShards.mcMask.width = 1680;
+					// mcIceShards.mcMask.height = 1064;
+					// mcIceShards.mcMask.x = -posX;
+					// mcIceShards.mcMask.y = -posY;
+					// mcIceShards.mcMask.visible = false;
+					// this.addChild(mcIceShards.circle.mask);
+					image = mcIceShards.circle;
+					break;
+				case 3:
+					this.building = getBuildingForPos(posX, posY);
+					image = new Bitmap(GV.gemBitmapCreator.bmpdEnhIconBolt, PixelSnapping.ALWAYS, true);
+					this.x = (this.building.fieldX + 1) * 28 - image.width / 2;
+					this.y = (this.building.fieldY + 1) * 28 - image.height / 2;
+					break;
+				case 4:
+					this.building = getBuildingForPos(posX, posY);
+					image = new Bitmap(GV.gemBitmapCreator.bmpdEnhIconBeam, PixelSnapping.ALWAYS, true);
+					this.x = (this.building.fieldX + 1) * 28 - image.width / 2;
+					this.y = (this.building.fieldY + 1) * 28 - image.height / 2;
+					break;
+				case 5:
+					this.building = getBuildingForPos(posX, posY);
+					image = new Bitmap(GV.gemBitmapCreator.bmpdEnhIconBarrage, PixelSnapping.ALWAYS, true);
+					this.x = (this.building.fieldX + 1) * 28 - image.width / 2;
+					this.y = (this.building.fieldY + 1) * 28 - image.height / 2;
+					break;
+			}
+
+			image.x = 50;
+			image.y = 8;
+
+			this.addChild(image);
 		}
 		
 		public function cast(): void
 		{
 			if (spellType >= 0 && spellType <= 2)
 			{
-				new StrikeSpell(this.positionX, this.positionY, this.spellType);
+				new StrikeSpell(this.x, this.y, this.spellType);
 				consumeSpellCharge(this.spellType);
 			}
 			else if (spellType >= 3 && spellType <= 5)
@@ -37,23 +110,20 @@ package Autocast
 		
 		public function castReady(): Boolean
 		{
-			if (getSpellCharge(spellType) >= getMaxSpellCharge(spellType))
+			if (spellType <= 2 && getSpellCharge(spellType) >= getMaxSpellCharge(spellType))
 			{
-				if (spellType <= 2)
-				{
-					return true;
-				}
-				else if (building.insertedGem != null && (building.insertedGem.enhancementType != spellType - 3 || building.insertedGem.e_ammoLeft.g() == 0))
-				{
-					return true;
-				}
+				return true;
+			}
+			else if (spellType >= 3 && building.insertedGem != null && (building.insertedGem.enhancementType != spellType - 3 || building.insertedGem.e_ammoLeft.g() == 0))
+			{
+				return true;
 			}
 			return false;
 		}
 		
 		public function valid(): Boolean
 		{
-			if (this.spellType >= 3 && (this.building == null || this.building != getBuildingForPos(this.positionX, this.positionY)))
+			if (this.spellType >= 3 && (this.building == null || this.building != getBuildingForPos(this.x, this.y)))
 			{
 				return false;
 			}
@@ -138,6 +208,20 @@ package Autocast
 				return GV.ingameCore.buildingAreaMatrix[fieldY][fieldX];
 			}
 			return null;
+		}
+
+		public static function getBuildingPosX(x:int):int
+		{
+			if(x > 0 && x < 60 * 28)
+				return Math.floor(x / 28);
+			return -1;
+		}
+
+		public static function getBuildingPosY(y:int):int
+		{
+			if(y > 0 && y < 38 * 28)
+				return Math.floor(y / 28);
+			return -1;
 		}
 	}
 
